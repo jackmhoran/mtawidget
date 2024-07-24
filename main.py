@@ -9,6 +9,10 @@ from datetime import datetime, timedelta
 import pytz
 import pandas as pd
 
+from flask import Flask
+from flask import jsonify
+
+app = Flask(__name__)
 
 stop_id_to_station_name = {}
 direction_to_bound = {
@@ -83,9 +87,17 @@ def get_train_info(station_code):
 
                         # stop_name = stop_id_to_stop_name(gtfs_stop_id)
         mins_til.sort(key=lambda x: x['minutes_until_arrival'])
+        
+        pos_mins_til = []
         for m in mins_til:
-            print(
-                f"{direction_to_bound[direction]} {m['route_id']} Train: Arrives in {m['minutes_until_arrival']} minutes")
+            if m['minutes_until_arrival'] > 0:
+                pos_mins_til.append(m)
+        
+        return pos_mins_til
+
+        # for m in mins_til:
+        #     print(
+        #         f"{direction_to_bound[direction]} {m['route_id']} Train: Arrives in {m['minutes_until_arrival']} minutes")
 
 def get_trip_id_number(trip_id):
     return trip_id.split('..')[1][1:3]
@@ -133,26 +145,29 @@ def get_all_stops_by_subway_line(subway_line):
         return filtered_df[['Borough', 'Stop Name', 'Daytime Routes', 'GTFS Stop ID']]
 
 
+@app.route("/")
+def hello_world():
+    return "<p>Hello, World!</p>"
 
 
-def print_hi(name):
+def print_hi():
     # Use a breakpoint in the code line below to debug your script.
     # print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
     # feed = NYCTFeed("1", api_key='')
     # trains = feed.filter_trips(line_id=["1", "2", "3"], headed_for_stop_id=["127N", "127S"], underway=True)
     # print(str(trains[0]))
 
-    load_trip_to_station_dict("stations.csv")
-
-
-
     station_code = '635'  # Replace with actual station code
     print(get_train_info(station_code))
 
+def run_on_startup():
+    load_trip_to_station_dict("stations.csv")
+    print_hi()
 
-# Press the green button in the gutter to run the script.
+def prod():
+    run_on_startup()
 
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    prod()
     # print(get_all_stops_by_subway_line('456'))
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
