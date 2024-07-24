@@ -149,6 +149,20 @@ def get_all_stops_by_subway_line(subway_line):
 def hello_world():
     return "<p>Hello, World!</p>"
 
+@app.route("/schedule/<station_code>")
+def get_schedule(station_code):
+    train_info = get_train_info(station_code)
+
+    message = {
+        'status': 200,
+        'message': 'OK',
+        'trains': train_info
+    }
+
+    resp = jsonify(message)
+    resp.status_code = 200
+    return resp
+
 
 def print_hi():
     # Use a breakpoint in the code line below to debug your script.
